@@ -38,6 +38,7 @@ startbutton.onclick = () => {
 	document.body.appendChild(timetext);
 	document.body.appendChild(distancetext);
 	document.body.appendChild(mileagetext);
+	document.body.appendChild(nextfueltext);
 	// document.body.appendChild(veltext);
 	document.body.removeChild( startrenderer.domElement );
 	document.body.removeChild( startbutton );
@@ -119,6 +120,85 @@ loader.load( '../src/lighting_mcqueen.glb', function ( gltf ) {
 	console.error( error );
 
 } );
+
+var dinoco;
+loader.load( '../src/dinoco.glb', function ( gltf ) {
+
+	gltf.scene.position.set(29.206, 0.00, 12.177)
+	gltf.scene.rotation.y = 0.2
+	gltf.scene.rotateY(-1.57)
+	gltf.scene.scale.set(0.0007, 0.0007, 0.0008)
+	gltf.scene.translateX(-0.2)
+	gltf.scene.translateZ(0)
+	scene.add( gltf.scene );
+	dinoco = gltf.scene;
+
+}, undefined, function ( error ) {
+
+	console.error( error );
+
+} );
+
+var chick_hicks;
+loader.load( '../src/chick_hicks.glb', function ( gltf ) {
+
+	gltf.scene.position.set(29.206, 0.05, 12.177)
+	gltf.scene.rotation.y = 0.2
+	gltf.scene.translateY(-0.5)
+	gltf.scene.rotateY(-1.57);
+	gltf.scene.position.y = 0.01
+	gltf.scene.scale.set(0.0007, 0.0007, 0.0007)
+	gltf.scene.translateX(0.25)
+	gltf.scene.translateZ(0.02)
+	scene.add( gltf.scene );
+	chick_hicks = gltf.scene;
+
+}, undefined, function ( error ) {
+
+	console.error( error );
+
+} );
+
+var mator;
+loader.load( '../src/mator.glb', function ( gltf ) {
+
+	gltf.scene.position.set(29.206, 0.05, 12.177)
+	gltf.scene.rotation.y = 0.2
+	gltf.scene.translateY(-0.5)
+	gltf.scene.rotateY(-1.57);
+	gltf.scene.position.y = 0.01
+	gltf.scene.scale.set(0.0007, 0.0007, 0.0007)
+	gltf.scene.translateX(0.5)
+	gltf.scene.translateZ(-0.02)
+	scene.add( gltf.scene );
+	mator = gltf.scene;
+
+}, undefined, function ( error ) {
+
+	console.error( error );
+
+} );
+
+var francesco_bernoulli;
+loader.load( '../src/francesco_bernoulli.glb', function ( gltf ) {
+
+	gltf.scene.position.set(29.206, 0.05, 12.177)
+	gltf.scene.rotation.y = 0.2
+	gltf.scene.translateY(-0.5)
+	gltf.scene.rotateY(-1.57);
+	gltf.scene.position.y = 0.01
+	gltf.scene.scale.set(0.0007, 0.0007, 0.0007)
+	gltf.scene.translateX(-0.5)
+	gltf.scene.translateZ(0)
+	scene.add( gltf.scene );
+	francesco_bernoulli = gltf.scene;
+
+}, undefined, function ( error ) {
+
+	console.error( error );
+
+} );
+
 var vel = 0, time = 0, health = 10, fuel = 100, totalfuel = 1000, fuelused = 0, score = 0, distance = 0, mileage = 0;
 
 var healthtext = document.createElement('div');
@@ -180,6 +260,16 @@ mileagetext.style.backgroundColor = "black";
 mileagetext.innerHTML = "Mileage: ".concat(mileage.toString());
 mileagetext.style.top = 10 + 'px';
 mileagetext.style.left = 850 + 'px';
+
+var nextfueltext = document.createElement('div');
+nextfueltext.style.position = 'absolute';
+nextfueltext.style.width = 100;
+nextfueltext.style.height = 100;
+nextfueltext.style.color = "white";
+nextfueltext.style.backgroundColor = "black";
+nextfueltext.innerHTML = "Next fuel can in: ".concat('0');
+nextfueltext.style.top = 10 + 'px';
+nextfueltext.style.left = 1000 + 'px';
 
 // var veltext = document.createElement('div');
 // veltext.style.position = 'absolute';
@@ -3404,9 +3494,17 @@ function compare(a, b) {
 	else if (a[0] > b[0]) return 1
 	return 0;
 }
+var opponentshealth = [10, 10, 10, 10]
+var opponentsvel = [0, 0, 0, 0]
+var opponentsfuel = [100, 100, 100, 100]
+var opponentsdist = [0, 0, 0, 0]
+var opponentscolflag = [0, 0, 0, 0]
+var mcqueencolflag = 0
+var nextfuelcan = 0
 
 function animate() {
 	requestAnimationFrame( animate );
+	var opponents = [mator, chick_hicks, dinoco, francesco_bernoulli]
 	
 	if (flag === 0)
 		startrenderer.render( startscene, startcamera );
@@ -3427,6 +3525,7 @@ function animate() {
 			document.body.removeChild(timetext);
 			document.body.removeChild(distancetext);
 			document.body.removeChild(mileagetext);
+			document.body.removeChild(nextfueltext);
 			// document.body.removeChild(veltext);
 			document.body.appendChild(endrenderer.domElement);
 			document.body.appendChild( gameover );
@@ -3440,6 +3539,61 @@ function animate() {
 				scene.remove(fuelcans[i])
 				fuel += 20
 				fuelflag[i] = 1
+			}
+			else
+			{
+				for(var j=0; j<4; j++)
+				{
+					const box = new THREE.Box3().setFromObject(opponents[j])
+					if (box.intersectsBox(fuelbox) && fuelflag[i] === 0){
+						scene.remove(fuelcans[i])
+						opponentsfuel[j] += 20
+						fuelflag[i] = 1
+						break;
+					}
+				}
+			}
+		}
+		for(var i=0; i<4; i++)
+		{
+			var box = 0;
+			if (opponents[i])
+			{
+				box = new THREE.Box3().setFromObject(opponents[i])
+				if (opponentscolflag[i] === 0 && mcqueencolflag === 0 && box.intersectsBox(mcqueenbox)){
+					opponentshealth[i] -= 1
+					health -= 1
+					opponentscolflag[i] = 1
+					mcqueencolflag = 1
+				}
+				else if (!box.intersectsBox(mcqueenbox))
+				{
+					opponentscolflag[i] = 0
+					mcqueencolflag = 0
+				}
+			}
+		}
+
+		for(var j=0; j<4; j++)
+		{
+			var dist = []
+
+			for(var i=0; i<farray.length; i++)
+			{
+				var arr = [farray[i].position.x, farray[i].position.y, farray[i].position.z]
+				var d = Math.sqrt((opponents[j].position.x - arr[0])**2 + (opponents[j].position.y - arr[1])**2 + (opponents[j].position.z - arr[2])**2)
+				dist.push([d, i])
+			}
+			dist.sort(compare)
+			var ind = dist[0][1]
+
+			var d = Math.sqrt((opponents[j].position.x - farray[ind].position.x)**2 + (opponents[j].position.y - farray[ind].position.y)**2 + (opponents[j].position.z - farray[ind].position.z)**2);
+			if (d > 1){
+				var y = opponents[j].position.y
+				opponents[j].position.copy(farray[ind].position);
+				opponents[j].position.y = y;
+				opponentshealth[j] -= 1;
+				opponentsvel[j] /= 2
 			}
 		}
 
@@ -3495,8 +3649,23 @@ function animate() {
 		// 	flag = 1
 		// }
 		// console.log(midpointset.size)
+
+		dist = []
+
+		for(var i=0; i<fuelcans.length; i++)
+		{
+			var arr = [fuelcans[i].position.x, fuelcans[i].position.y, fuelcans[i].position.z]
+			var d = Math.sqrt((mcqueen.position.x - arr[0])**2 + (mcqueen.position.y - arr[1])**2 + (mcqueen.position.z - arr[2])**2)
+			if (fuelflag[i] === 0)
+				dist.push(d)
+		}
+		dist.sort(compare)
+		if (dist.length)
+			nextfueltext.innerHTML = "Next fuel can in: ".concat((Math.round(dist[0] * 100)/100).toString());
+		else nextfueltext.innerHTML = "Next fuel can in: NaN";
+
 		mcqueen.translateX(-vel)
-		distance += vel;
+		distance += ((vel > 0) ? vel : (-vel));
 		mileage = distance / fuelused
 		if (vel > 0 && wflag === 0 && sflag === 0)
 		{
