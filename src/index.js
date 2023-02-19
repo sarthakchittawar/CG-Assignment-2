@@ -1,6 +1,5 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
 import * as THREE from 'three';
 import { createLight } from './lighting';
 import { Object3D } from 'three';
@@ -14,7 +13,7 @@ const playercamera = new THREE.PerspectiveCamera( 75, window.innerWidth / window
 
 const startscene = new THREE.Scene();
 const startcamera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-const startrenderer = new THREE.WebGLRenderer(); 
+const startrenderer = new THREE.WebGLRenderer({antialias: true}); 
 startrenderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( startrenderer.domElement );
 startrenderer.outputEncoding = THREE.sRGBEncoding;
@@ -36,7 +35,7 @@ startbutton.onclick = () => {
 	document.body.appendChild(fueltext);
 	document.body.appendChild(scoretext);
 	document.body.appendChild(timetext);
-	document.body.appendChild(distancetext);
+	// document.body.appendChild(distancetext);
 	document.body.appendChild(mileagetext);
 	document.body.appendChild(nextfueltext);
 	// document.body.appendChild(veltext);
@@ -56,10 +55,11 @@ document.body.appendChild(startbutton);
 
 const endscene = new THREE.Scene();
 const endcamera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-const endrenderer = new THREE.WebGLRenderer(); 
+const endrenderer = new THREE.WebGLRenderer({antialias: true}); 
 endrenderer.setSize( window.innerWidth, window.innerHeight );
 // document.body.appendChild( endrenderer.domElement );
 endrenderer.outputEncoding = THREE.sRGBEncoding;
+var winners = ['Mator', 'Chick Hicks', 'McQueen', 'Dinoco', 'Francesco']
 
 var gameover = document.createElement('div');
 gameover.innerHTML = "GAME OVER!"
@@ -71,12 +71,12 @@ gameover.style.backgroundColor = "black";
 gameover.style.top = 10 + 'px';
 gameover.style.left = 850 + 'px';
 
-const renderer = new THREE.WebGLRenderer(); 
+const renderer = new THREE.WebGLRenderer({antialias: true}); 
 renderer.setSize( window.innerWidth, window.innerHeight );
 // document.body.appendChild( renderer.domElement );
 renderer.outputEncoding = THREE.sRGBEncoding;
 
-const renderer2 = new THREE.WebGLRenderer(); 
+const renderer2 = new THREE.WebGLRenderer({antialias: true}); 
 renderer2.setSize( 200, 200 );
 // document.body.appendChild( renderer2.domElement );
 renderer2.outputEncoding = THREE.sRGBEncoding;
@@ -239,17 +239,17 @@ timetext.style.color = "white";
 timetext.style.backgroundColor = "black";
 timetext.innerHTML = "Time: ".concat(time.toString());
 timetext.style.top = 10 + 'px';
-timetext.style.left = 600 + 'px';
+timetext.style.left = 650 + 'px';
 
-var distancetext = document.createElement('div');
-distancetext.style.position = 'absolute';
-distancetext.style.width = 100;
-distancetext.style.height = 100;
-distancetext.style.color = "white";
-distancetext.style.backgroundColor = "black";
-distancetext.innerHTML = "Distance: ".concat(distance.toString());
-distancetext.style.top = 10 + 'px';
-distancetext.style.left = 700 + 'px';
+// var distancetext = document.createElement('div');
+// distancetext.style.position = 'absolute';
+// distancetext.style.width = 100;
+// distancetext.style.height = 100;
+// distancetext.style.color = "white";
+// distancetext.style.backgroundColor = "black";
+// distancetext.innerHTML = "Distance: ".concat(distance.toString());
+// distancetext.style.top = 10 + 'px';
+// distancetext.style.left = 700 + 'px';
 
 var mileagetext = document.createElement('div');
 mileagetext.style.position = 'absolute';
@@ -259,7 +259,7 @@ mileagetext.style.color = "white";
 mileagetext.style.backgroundColor = "black";
 mileagetext.innerHTML = "Mileage: ".concat(mileage.toString());
 mileagetext.style.top = 10 + 'px';
-mileagetext.style.left = 850 + 'px';
+mileagetext.style.left = 750 + 'px';
 
 var nextfueltext = document.createElement('div');
 nextfueltext.style.position = 'absolute';
@@ -269,7 +269,7 @@ nextfueltext.style.color = "white";
 nextfueltext.style.backgroundColor = "black";
 nextfueltext.innerHTML = "Next fuel can in: ".concat('0');
 nextfueltext.style.top = 10 + 'px';
-nextfueltext.style.left = 1000 + 'px';
+nextfueltext.style.left = 900 + 'px';
 
 // var veltext = document.createElement('div');
 // veltext.style.position = 'absolute';
@@ -3497,21 +3497,134 @@ function compare(a, b) {
 var opponentshealth = [10, 10, 10, 10]
 var opponentsvel = [0, 0, 0, 0]
 var opponentsfuel = [100, 100, 100, 100]
-var opponentsdist = [0, 0, 0, 0]
+var opponentsdist = [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]]
 var opponentscolflag = [0, 0, 0, 0]
 var mcqueencolflag = 0
 var nextfuelcan = 0
-
+var fuelcanflag = 0
+var chick_hicksPositionOnSpline = 0, dinocoPositionOnSpline = 0, matorPositionOnSpline = 0, francescoPositionOnSpline = 0;
+var dinocoiters = Math.round(Math.random() * 100)
+var matoriters = Math.round(Math.random() * 100)
+var francescoiters = Math.round(Math.random() * 100)
+var iters = 0
+var dinocoflag = 0, matorflag = 0, francescoflag = 0
 function animate() {
 	requestAnimationFrame( animate );
 	var opponents = [mator, chick_hicks, dinoco, francesco_bernoulli]
+	// console.log(nextfuelcan)
 	
 	if (flag === 0)
 		startrenderer.render( startscene, startcamera );
 	else if (flag === 2)
+	{
+		opponentsdist.sort(compare)
+		gameover.innerHTML = "1. ".concat(winners[opponentsdist[4][1]].toString())
+		gameover.innerHTML += " with score = ".concat(opponentsdist[4][0].toString())
+		gameover.innerHTML += "<br></br>2. ".concat(winners[opponentsdist[3][1]].toString())
+		gameover.innerHTML += " with score = ".concat(opponentsdist[3][0].toString())
+		gameover.innerHTML += "<br></br>3. ".concat(winners[opponentsdist[2][1]].toString())
+		gameover.innerHTML += " with score = ".concat(opponentsdist[2][0].toString())
+		gameover.innerHTML += "<br></br>4. ".concat(winners[opponentsdist[1][1]].toString())
+		gameover.innerHTML += " with score = ".concat(opponentsdist[1][0].toString())
+		gameover.innerHTML += "<br></br>5. ".concat(winners[opponentsdist[0][1]].toString())
+		gameover.innerHTML += " with score = ".concat(opponentsdist[0][0].toString())
 		endrenderer.render( endscene, endcamera );
+	}
 	else
 	{
+		iters++;
+		opponentsdist[2][0] = distance
+
+		var points = []
+		for(var i=midpoints.length - 1; i>=100; i-=2)
+		{
+			var pos = new THREE.Vector3(midpoints[i]['x'], midpoints[i]['y'], midpoints[i]['z'])
+			points.push(pos)
+		}
+		var spline = new THREE.CatmullRomCurve3( points );
+		var newPosition = spline.getPoint( chick_hicksPositionOnSpline );
+		chick_hicks.position.copy( newPosition );
+		var target = spline.getPoint( chick_hicksPositionOnSpline + .001 );
+		chick_hicks.lookAt( target );
+		chick_hicks.rotateY(3.14)
+		if (opponentsfuel[1] != 0 && opponentshealth[1] != 0)
+		{
+			chick_hicks.translateX(0.5)
+			opponentsdist[1][0] += 0.5
+		}
+		distance += ((vel > 0) ? vel : (-vel))*4;	// normalise this with opponents
+
+		if (iters >= dinocoiters)
+		{
+			dinocoflag = 1
+		}
+		if (iters >= matoriters)
+		{
+			matorflag = 1
+		}
+		if (iters >= francescoiters)
+		{
+			francescoflag = 1
+		}
+		if (dinocoflag === 1)
+		{
+			var dinocoPosition = spline.getPoint( dinocoPositionOnSpline );
+			target = spline.getPoint( dinocoPositionOnSpline + .001 );
+
+			dinoco.position.copy( dinocoPosition );
+			dinoco.lookAt( target );
+			dinoco.rotateY(3.14)
+			dinoco.translateX(-0.5)
+			// if (iters % Math.round(Math.random()*3) === 0)
+			if (opponentsfuel[2] != 0 && opponentshealth[2] != 0)
+			{
+				dinocoPositionOnSpline += 1
+				opponentsdist[3][0] += 0.5
+			}
+		}
+		if (matorflag === 1)
+		{
+			var matorPosition = spline.getPoint( matorPositionOnSpline );
+			target = spline.getPoint( matorPositionOnSpline + .001 );
+
+			mator.position.copy( matorPosition );
+			mator.lookAt( target );
+			mator.translateX(-0.5)
+			// if (iters % Math.round(Math.random()*3) === 0)
+			if (opponentsfuel[0] != 0 && opponentshealth[0] != 0)
+			{
+				matorPositionOnSpline += 1
+				opponentsdist[0][0] += 0.5
+			}
+		}
+		if (francescoflag === 1)
+		{
+			var francescoPosition = spline.getPoint( francescoPositionOnSpline );
+			target = spline.getPoint( francescoPositionOnSpline + .001 );
+
+			francesco_bernoulli.position.copy( francescoPosition );
+			francesco_bernoulli.lookAt( target );
+			francesco_bernoulli.rotateY(3.14)
+			francesco_bernoulli.translateX(-0.5)
+			// if (iters % Math.round(Math.random()*3) === 0)
+			if (opponentsfuel[3] != 0 && opponentshealth[3] != 0)
+			{
+				francescoPositionOnSpline += 1
+				opponentsdist[4][0] += 0.5
+			}
+		}
+		// mator.position.copy( newPosition );
+		// mator.lookAt( target );
+		// mator.translateX(-0.5)
+		// mator.translateZ(1)
+		// francesco_bernoulli.position.copy( newPosition );
+		// francesco_bernoulli.lookAt( target );
+		// francesco_bernoulli.rotateY(3.14)
+		// francesco_bernoulli.translateX(-0.5)
+		// francesco_bernoulli.translateZ(-1)
+		// if (iters % Math.round(Math.random()*3) === 0)
+			chick_hicksPositionOnSpline += 1
+
 		if (Math.round(fuel * 1000)/1000 === 0 || health === 0)
 		{
 			flag = 2
@@ -3523,7 +3636,7 @@ function animate() {
 			document.body.removeChild(fueltext);
 			document.body.removeChild(scoretext);
 			document.body.removeChild(timetext);
-			document.body.removeChild(distancetext);
+			// document.body.removeChild(distancetext);
 			document.body.removeChild(mileagetext);
 			document.body.removeChild(nextfueltext);
 			// document.body.removeChild(veltext);
@@ -3637,7 +3750,7 @@ function animate() {
 		timetext.innerHTML = "Time: ".concat(Math.round(time).toString());
 		fueltext.innerHTML = "Fuel: ".concat(Math.round(fuel).toString());
 		healthtext.innerHTML = "Health: ".concat(Math.round(health).toString());
-		distancetext.innerHTML = "Distance: ".concat((Math.round(distance * 100)/100).toString());
+		scoretext.innerHTML = "Score: ".concat(Math.round(distance).toString());
 		mileagetext.innerHTML = "Mileage: ".concat((Math.round(mileage * 100)/100).toString());
 		// veltext.innerHTML = "Velocity: ".concat((Math.round(vel * 100)/100).toString());
 
@@ -3651,21 +3764,44 @@ function animate() {
 		// console.log(midpointset.size)
 
 		dist = []
-
-		for(var i=0; i<fuelcans.length; i++)
-		{
-			var arr = [fuelcans[i].position.x, fuelcans[i].position.y, fuelcans[i].position.z]
-			var d = Math.sqrt((mcqueen.position.x - arr[0])**2 + (mcqueen.position.y - arr[1])**2 + (mcqueen.position.z - arr[2])**2)
-			if (fuelflag[i] === 0)
-				dist.push(d)
+		var d = -1
+		var c = 0
+		while (fuelflag[nextfuelcan] === 1 && c < fuelcans.length){
+			fuelcanflag = 0
+			nextfuelcan = (nextfuelcan + 1) % fuelcans.length;
+			c++;
 		}
-		dist.sort(compare)
-		if (dist.length)
-			nextfueltext.innerHTML = "Next fuel can in: ".concat((Math.round(dist[0] * 100)/100).toString());
+		if (c < fuelcans.length)
+		{
+			var arr = [fuelcans[nextfuelcan].position.x, fuelcans[nextfuelcan].position.y, fuelcans[nextfuelcan].position.z]
+			d = Math.sqrt((mcqueen.position.x - arr[0])**2 + (mcqueen.position.y - arr[1])**2 + (mcqueen.position.z - arr[2])**2)
+		}
+		if (d > 0 && d < 2) fuelcanflag = 1;
+		else if (d > 0)
+		{
+			if (fuelcanflag)
+			{
+				fuelcanflag = 0
+				nextfuelcan = (nextfuelcan + 1) % fuelcans.length
+			}
+		}
+			
+
+		// for(var i=0; i<fuelcans.length; i++)
+		// {
+		// 	var arr = [fuelcans[i].position.x, fuelcans[i].position.y, fuelcans[i].position.z]
+		// 	var d = Math.sqrt((mcqueen.position.x - arr[0])**2 + (mcqueen.position.y - arr[1])**2 + (mcqueen.position.z - arr[2])**2)
+		// 	if (fuelflag[i] === 0)
+		// 		dist.push([d, i])
+		// }
+		// dist.sort(compare)
+		// console.log(dist[0])
+		if (d >= 0)
+			nextfueltext.innerHTML = "Next fuel can in: ".concat((Math.round(d * 100)/100).toString());
 		else nextfueltext.innerHTML = "Next fuel can in: NaN";
 
 		mcqueen.translateX(-vel)
-		distance += ((vel > 0) ? vel : (-vel));
+		// distance += ((vel > 0) ? vel : (-vel));
 		mileage = distance / fuelused
 		if (vel > 0 && wflag === 0 && sflag === 0)
 		{
