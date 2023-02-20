@@ -124,6 +124,7 @@ loader.load( '../src/lighting_mcqueen.glb', function ( gltf ) {
 } );
 
 var dinoco;
+var init_dinoco;
 loader.load( '../src/dinoco.glb', function ( gltf ) {
 
 	gltf.scene.position.set(29.206, 0.00, 12.177)
@@ -134,6 +135,7 @@ loader.load( '../src/dinoco.glb', function ( gltf ) {
 	gltf.scene.translateZ(0)
 	scene.add( gltf.scene );
 	dinoco = gltf.scene;
+	init_dinoco = dinoco.position
 
 }, undefined, function ( error ) {
 
@@ -142,6 +144,7 @@ loader.load( '../src/dinoco.glb', function ( gltf ) {
 } );
 
 var chick_hicks;
+var init_chick_hicks;
 loader.load( '../src/chick_hicks.glb', function ( gltf ) {
 
 	gltf.scene.position.set(29.206, 0.05, 12.177)
@@ -154,6 +157,7 @@ loader.load( '../src/chick_hicks.glb', function ( gltf ) {
 	gltf.scene.translateZ(0.02)
 	scene.add( gltf.scene );
 	chick_hicks = gltf.scene;
+	init_chick_hicks = chick_hicks.position
 
 }, undefined, function ( error ) {
 
@@ -162,6 +166,7 @@ loader.load( '../src/chick_hicks.glb', function ( gltf ) {
 } );
 
 var mator;
+var init_mator;
 var mclone;
 loader.load( '../src/mator.glb', function ( gltf ) {
 
@@ -176,6 +181,7 @@ loader.load( '../src/mator.glb', function ( gltf ) {
 	scene.add( gltf.scene );
 	mator = gltf.scene;
 	mclone = mator.clone()
+	init_mator = mator.position
 
 }, undefined, function ( error ) {
 
@@ -184,6 +190,7 @@ loader.load( '../src/mator.glb', function ( gltf ) {
 } );
 
 var francesco_bernoulli;
+var init_francesco_bernoulli;
 var fclone;
 loader.load( '../src/francesco_bernoulli.glb', function ( gltf ) {
 
@@ -198,6 +205,7 @@ loader.load( '../src/francesco_bernoulli.glb', function ( gltf ) {
 	scene.add( gltf.scene );
 	francesco_bernoulli = gltf.scene;
 	fclone = francesco_bernoulli.clone()
+	init_francesco_bernoulli = francesco_bernoulli.position
 
 }, undefined, function ( error ) {
 
@@ -3509,10 +3517,10 @@ var mcqueencolflag = 0
 var nextfuelcan = 0
 var fuelcanflag = 0
 var chick_hicksPositionOnSpline = 0, dinocoPositionOnSpline = 0, matorPositionOnSpline = 0, francescoPositionOnSpline = 0;
-var chickiters = Math.round(Math.random() * 100)
+var chickiters = Math.round(Math.random() * 100) + 50
 var dinocoiters = Math.round(Math.random() * 100)
 var matoriters = Math.round(Math.random() * 100)
-var francescoiters = Math.round(Math.random() * 100)
+var francescoiters = Math.round(Math.random() * 100) + 50
 var iters = 0
 var dinocoflag = 0, matorflag = 0, francescoflag = 0, chickhicksflag = 0
 var laps = 0, lapflag = 0
@@ -3588,12 +3596,22 @@ function animate() {
 			var target = spline.getPoint( chick_hicksPositionOnSpline + .001 );
 			chick_hicks.lookAt( target );
 			chick_hicks.rotateY(3.14)
+			chick_hicks.translateX(0.2)
+			var a = Math.round(Math.random()*2 + 1)
 			if (opponentsfuel[1] > 0 && opponentshealth[1] > 0)
 			{
-				chick_hicksPositionOnSpline += 1
-				chick_hicks.translateX(0.5)
-				opponentsdist[1][0] += 0.5
-				opponentsfuel[1] -= 0.1
+				if (a === 3)
+				{
+					chick_hicksPositionOnSpline += 2
+					opponentsdist[1][0] += 1
+					opponentsfuel[1] -= 0.2
+				}
+				else
+				{
+					chick_hicksPositionOnSpline += 1
+					opponentsdist[1][0] += 0.5
+					opponentsfuel[1] -= 0.1
+				}
 			}
 		}
 		if (dinocoflag === 1)
@@ -3604,13 +3622,23 @@ function animate() {
 			dinoco.position.copy( dinocoPosition );
 			dinoco.lookAt( target );
 			dinoco.rotateY(3.14)
-			dinoco.translateX(-0.5)
-			// if (iters % Math.round(Math.random()*3) === 0)
+			dinoco.translateX(-0.2)
+			var a = Math.round(Math.random()*3 + 1)
+			// if (iters % Math.round(Math.random()*3) === 0)			
 			if (opponentsfuel[2] > 0 && opponentshealth[2] > 0)
 			{
-				dinocoPositionOnSpline += 1
-				opponentsdist[3][0] += 0.5
-				opponentsfuel[2] -= 0.1
+				if (a > 3)
+				{
+					dinocoPositionOnSpline += 2
+					opponentsdist[3][0] += 1
+					opponentsfuel[2] -= 0.2
+				}
+				else
+				{
+					dinocoPositionOnSpline += 1
+					opponentsdist[3][0] += 0.5
+					opponentsfuel[2] -= 0.1
+				}
 			}
 		}
 		if (matorflag === 1)
@@ -3621,12 +3649,22 @@ function animate() {
 			mator.position.copy( matorPosition );
 			mator.lookAt( target );
 			mator.translateX(-0.5)
+			var a = Math.round(Math.random()*3 + 1)
 			// if (iters % Math.round(Math.random()*3) === 0)
 			if (opponentsfuel[0] > 0 && opponentshealth[0] > 0)
 			{
-				matorPositionOnSpline += 1
-				opponentsdist[0][0] += 0.5
-				opponentsfuel[0] -= 0.1
+				if (a > 3)
+				{
+					matorPositionOnSpline += 2
+					opponentsdist[0][0] += 1
+					opponentsfuel[0] -= 0.2
+				}
+				else
+				{
+					matorPositionOnSpline += 1
+					opponentsdist[0][0] += 0.5
+					opponentsfuel[0] -= 0.1
+				}
 			}
 		}
 		if (francescoflag === 1)
@@ -3639,11 +3677,21 @@ function animate() {
 			francesco_bernoulli.rotateY(3.14)
 			francesco_bernoulli.translateX(-0.5)
 			// if (iters % Math.round(Math.random()*3) === 0)
+			var a = Math.round(Math.random()*2 + 1)
 			if (opponentsfuel[3] > 0 && opponentshealth[3] > 0)
 			{
-				francescoPositionOnSpline += 1
-				opponentsdist[4][0] += 0.5
-				opponentsfuel[3] -= 0.1
+				if (a === 3)
+				{
+					francescoPositionOnSpline += 2
+					opponentsdist[4][0] += 1
+					opponentsfuel[3] -= 0.2
+				}
+				else
+				{
+					francescoPositionOnSpline += 1
+					opponentsdist[4][0] += 0.5
+					opponentsfuel[3] -= 0.1
+				}
 			}
 		}
 		// mator.position.copy( newPosition );
